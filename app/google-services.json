@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "973019270030",
+    "project_id": "note-analytics-ac0bd",
+    "storage_bucket": "note-analytics-ac0bd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:973019270030:android:2cc2d709cfa9538b1772df",
+        "android_client_info": {
+          "package_name": "com.reema.noteanalytics"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "973019270030-3n59ldlmernolt3q65u6k9e03i4pa3lu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWjN2TwcISbP_O3P-BXE-JV2quqSE2DeM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "973019270030-3n59ldlmernolt3q65u6k9e03i4pa3lu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
