@@ -2,7 +2,6 @@ package com.reema.noteanalytics;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -10,61 +9,66 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.TextView;
+
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements CatAdapter.ItemClickListener{
+public class MainActivity2 extends AppCompatActivity implements NoteAdapter.ItemClickListener{
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAnalytics mFirebaseAnalytics;
-    ArrayList<Category> items;
-    CatAdapter adapter;
+    ArrayList<Note> item;
+    NoteAdapter nAdapter;
+    TextView textView;
     LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-    RecyclerView rycCat;
+    RecyclerView rycNote;
     Calendar calendar = Calendar.getInstance();
     int hour = calendar.get(Calendar.HOUR);
     int minute = calendar.get(Calendar.MINUTE);
     int second = calendar.get(Calendar.SECOND);
-    CardView card;
-
+    String id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main2);
+        rycNote = findViewById(R.id.rycNote);
+        item = new ArrayList<Note>();
+        nAdapter = new NoteAdapter(this, item,this);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        card = findViewById(R.id.card);
-        screenTrack("Categories Screen");
+        screenTrack("Notes Screen");
+
+        Intent intent = getIntent();
+        Category cat = (Category) intent.getSerializableExtra("Category");
+         id = cat.getName();
+//
+     textView = findViewById(R.id.textView);
+     textView.setVisibility(View.GONE);
+//       textView.setText(id);
 
 
+       GetAllNotes();
 
-
-        rycCat = findViewById(R.id.rycCat);
-        items = new ArrayList<Category>();
-        adapter = new CatAdapter(this, items,this);
-
-//        card.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//            }
-//        });
-        GetAllCat();
     }
 
+    private void GetAllNotes() {
+        DocumentReference docRef = db.collection("Categories").document(id);
 
-    private void GetAllCat() {
-
-        db.collection("Categories").get()
+// Create a reference to the collection inside the document
+        CollectionReference postsRef = docRef.collection("Notes");
+        postsRef.get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot documentSnapshots) {
@@ -75,16 +79,19 @@ public class MainActivity extends AppCompatActivity implements CatAdapter.ItemCl
                             for (DocumentSnapshot documentSnapshot : documentSnapshots) {
                                 if (documentSnapshot.exists()) {
                                     String id = documentSnapshot.getId();
-                                    String name = documentSnapshot.getString("Category");
-                                    Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-                                    Category cat = new Category(id,name);
-                                    intent.putExtra("Category", cat);
-                                    items.add(cat);
-                                    rycCat.setLayoutManager(layoutManager);
-                                    rycCat.setHasFixedSize(true);
-                                    rycCat.setAdapter(adapter);
-                                    adapter.notifyDataSetChanged();
-                                    Log.e("LogDATA", items.toString());
+                                    String name = documentSnapshot.getString("Note");
+                                    String cat = documentSnapshot.getString("Note");
+                                    Intent i = new Intent(MainActivity2.this, MainActivity3.class);
+
+                                    Note note = new Note(id,name,cat);
+                                    i.putExtra("Note",note);
+
+                                    item.add(note);
+                                    rycNote.setLayoutManager(layoutManager);
+                                    rycNote.setHasFixedSize(true);
+                                    rycNote.setAdapter(nAdapter);
+                                    nAdapter.notifyDataSetChanged();
+                                    Log.e("LogDATA", item.toString());
                                 }
                             }
                         }
@@ -98,18 +105,10 @@ public class MainActivity extends AppCompatActivity implements CatAdapter.ItemCl
                     }
                 });
     }
-    public void cardEvent(String id,String name,String content){
-        Bundle bundle = new Bundle();
-        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, id);
-        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
-        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE,content);
-        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
-
-    }
     public void screenTrack(String screenName){
         Bundle bundle = new Bundle();
         bundle.putString(FirebaseAnalytics.Param.SCREEN_NAME, screenName);
-        bundle.putString(FirebaseAnalytics.Param.SCREEN_CLASS, "Main Activity");
+        bundle.putString(FirebaseAnalytics.Param.SCREEN_CLASS, "Main Activity2");
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, bundle);
     }
 
@@ -127,12 +126,12 @@ public class MainActivity extends AppCompatActivity implements CatAdapter.ItemCl
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         HashMap<String,Object> screens = new HashMap<>();
-        screens.put("name","Categories Screen");
+        screens.put("name","Notes Screen");
         screens.put("hours",h);
         screens.put("minute",m);
         screens.put("seconds",s);
 
-        db.collection("Categories Screen").add(screens)
+        db.collection("Notes Screen").add(screens)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
@@ -152,13 +151,12 @@ public class MainActivity extends AppCompatActivity implements CatAdapter.ItemCl
     }
     @Override
     public void onItemClick(int position, String id) {
-        Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-        Category cat = new Category(id, items.get(position).id.toString());
-        intent.putExtra("Category", cat);
-        cardEvent("food@1","Food Button","Button");
+        Intent i = new Intent(MainActivity2.this, MainActivity3.class);
+        Note note = new Note(id, item.get(position).name.toString(),item.get(position).id.toString());
+        i.putExtra("Note", note);
+        //cardEvent("food@1","Food Button","Button");
 
-        startActivity(intent);
+        startActivity(i);
     }
-
-
 }
+

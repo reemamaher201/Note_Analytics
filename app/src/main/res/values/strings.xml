@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Note Analytics</string>
+    <string name="category_title">Category Title</string>
 </resources>
