@@ -3,6 +3,7 @@ package com.reema.noteanalytics;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -155,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements CatAdapter.ItemCl
         Intent intent = new Intent(MainActivity.this, MainActivity2.class);
         Category cat = new Category(id, items.get(position).id.toString());
         intent.putExtra("Category", cat);
-        cardEvent("food@1","Food Button","Button");
+        cardEvent(id,"Category Button",items.get(position).name);
 
         startActivity(intent);
     }

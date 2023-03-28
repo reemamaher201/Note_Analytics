@@ -39,7 +39,7 @@ public class MainActivity2 extends AppCompatActivity implements NoteAdapter.Item
     int hour = calendar.get(Calendar.HOUR);
     int minute = calendar.get(Calendar.MINUTE);
     int second = calendar.get(Calendar.SECOND);
-    String id;
+    String cid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +52,7 @@ public class MainActivity2 extends AppCompatActivity implements NoteAdapter.Item
 
         Intent intent = getIntent();
         Category cat = (Category) intent.getSerializableExtra("Category");
-         id = cat.getName();
+         cid = cat.getName();
 //
      textView = findViewById(R.id.textView);
      textView.setVisibility(View.GONE);
@@ -64,7 +64,7 @@ public class MainActivity2 extends AppCompatActivity implements NoteAdapter.Item
     }
 
     private void GetAllNotes() {
-        DocumentReference docRef = db.collection("Categories").document(id);
+        DocumentReference docRef = db.collection("Categories").document(cid);
 
 // Create a reference to the collection inside the document
         CollectionReference postsRef = docRef.collection("Notes");
@@ -80,7 +80,7 @@ public class MainActivity2 extends AppCompatActivity implements NoteAdapter.Item
                                 if (documentSnapshot.exists()) {
                                     String id = documentSnapshot.getId();
                                     String name = documentSnapshot.getString("Note");
-                                    String cat = documentSnapshot.getString("Note");
+                                    String cat = documentSnapshot.getString("Category");
                                     Intent i = new Intent(MainActivity2.this, MainActivity3.class);
 
                                     Note note = new Note(id,name,cat);
@@ -104,6 +104,14 @@ public class MainActivity2 extends AppCompatActivity implements NoteAdapter.Item
 
                     }
                 });
+    }
+    public void cardEvent(String id,String name,String content){
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, id);
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name);
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE,content);
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+
     }
     public void screenTrack(String screenName){
         Bundle bundle = new Bundle();
@@ -152,9 +160,10 @@ public class MainActivity2 extends AppCompatActivity implements NoteAdapter.Item
     @Override
     public void onItemClick(int position, String id) {
         Intent i = new Intent(MainActivity2.this, MainActivity3.class);
-        Note note = new Note(id, item.get(position).name.toString(),item.get(position).id.toString());
+        Note note = new Note(id, item.get(position).name.toString(),item.get(position).id);
         i.putExtra("Note", note);
-        //cardEvent("food@1","Food Button","Button");
+        i.putExtra("cid",cid);
+        cardEvent(id,"Note Button",item.get(position).name);
 
         startActivity(i);
     }
